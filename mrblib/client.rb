@@ -124,6 +124,7 @@ module WebSocket
       end
       @msgs.dup
     ensure
+      @socket.close unless @socket.closed?
       @msgs.clear
     end
   end
