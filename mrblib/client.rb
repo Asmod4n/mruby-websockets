@@ -104,18 +104,14 @@ module WebSocket
       else
         @client.queue_close(status_code)
       end
-      while @client.want_write?
-        @socket_pi.events = ZMQ::POLLOUT
-        pis = @poller.wait
-        if pis.is_a? Array
-          @client.send
-        end
-      end
-      while @client.want_read?
-        @socket_pi.events = ZMQ::POLLIN
+      while @client.want_write?||@client.want_read?
+        @socket_pi.events = 0
+        @socket_pi.events |= ZMQ::POLLIN  if @client.want_read?
+        @socket_pi.events |= ZMQ::POLLOUT if @client.want_write?
         pis = @poller.wait(timeout)
-        if pis.is_a? Array
-          @client.recv
+        if pis.is_a?(Array)
+          @client.send if @socket_pi.writable?
+          @client.recv if @socket_pi.readable?
         else
           return pis
         end
