@@ -5,9 +5,7 @@ module WebSocket
       when :ws
         @socket = TCPSocket.new host, port
       when :wss
-        @tcp_socket = TCPSocket.new host, port
-        @socket = Tls::Client.new(Tls::Config.new(options))
-        @socket.connect_socket(@tcp_socket.fileno, host)
+        raise Error, "wss not yet supported"
       end
       key = WebSocket.create_key
       @socket.write("GET #{path} HTTP/1.1\r\nHost: #{host}:#{port}\r\nConnection: Upgrade\r\nUpgrade: WebSocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: #{key}\r\n\r\n")
