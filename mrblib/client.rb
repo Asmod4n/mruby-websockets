@@ -21,7 +21,7 @@ module WebSocket
         end
       end
       headers = phr.headers.to_h
-      if headers.has_key?('sec-websocket-accept') && headers['sec-websocket-accept'] != WebSocket.create_accept(key)
+      if headers['sec-websocket-accept'] != WebSocket.create_accept(key)
         @socket.close
         return :handshake_failed
       end
@@ -66,7 +66,7 @@ module WebSocket
         case mode
         when :once
           @reactor.run_once
-        when :endless
+        when :blocking
           @reactor.run
         when :nowait
           @reactor.run_nowait
