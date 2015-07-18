@@ -4,18 +4,9 @@
 Example
 
 ```ruby
-client = WebSocket::Client.new(nil, "echo.websocket.org", 80, "/") do |msg|
-  puts msg
-end
-
+client = WebSocket::Client.new(:ws, "echo.websocket.org", 80, "/")
 client.send "hallo"
-
-client.run
-client.run
+client.recv
 client.close
-client.run
-client.run
-client.run
-client.run
 
 ````
