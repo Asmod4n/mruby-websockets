@@ -52,7 +52,7 @@ module WebSocket
           end
         end
       end
-      @msgs.pop
+      @msgs.shift
     ensure
       @socket_pi.events = ZMQ::POLLOUT
       while @client.want_write?
