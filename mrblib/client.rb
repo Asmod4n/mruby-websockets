@@ -32,7 +32,6 @@ module WebSocket
       @callbacks = Wslay::Event::Callbacks.new
       @callbacks.recv_callback {|buf, len| @socket.recv len, Socket::MSG_DONTWAIT}
       @callbacks.send_callback {|buf| @socket.send buf, Socket::MSG_DONTWAIT}
-      @callbacks.genmask_callback {|buf, len| RandomBytes.buf buf, len}
       @msgs = []
       @callbacks.on_msg_recv_callback {|msg| @msgs << msg}
       @client = Wslay::Event::Context::Client.new @callbacks
