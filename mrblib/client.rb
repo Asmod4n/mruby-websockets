@@ -55,8 +55,12 @@ module WebSocket
     ensure
       @socket_pi.events = ZMQ::POLLOUT
       while @client.want_write?
-        pis = @poller.wait
-        @client.send if pis.is_a? Array
+        pis = @poller.wait(timeout)
+        if pis.is_a? Array
+          @client.send
+        else
+          break
+        end
       end
     end
 
