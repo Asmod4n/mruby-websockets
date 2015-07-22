@@ -60,11 +60,11 @@ module WebSocket
       end
     end
 
-    def send(msg, opcode = :text_frame)
+    def send(msg, opcode = :text_frame, timeout = -1)
       @client.queue_msg(opcode, msg)
       @socket_pi.events = ZMQ::POLLOUT
       while @client.want_write?
-        pis = @poller.wait
+        pis = @poller.wait(timeout)
         if pis.is_a? Array
           @client.send
         else
