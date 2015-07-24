@@ -1,9 +1,5 @@
-﻿#include <mruby.h>
-#include <string.h>
-#include <openssl/sha.h>
-#include <mruby/string.h>
-#include <b64/cencode.h>
-#include <sodium.h>
+﻿#include "mruby/websocket.h"
+#include "mrb_websocket.h"
 
 #define WS_GUID "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
@@ -16,7 +12,7 @@ mrb_websocket_create_accept(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "s", &client_key, &client_key_len);
 
   if (client_key_len != 24)
-    return mrb_symbol_value(mrb_intern_lit(mrb, "wrong_client_key_len"));
+    mrb_raise(mrb, E_WEBSOCKET_ERROR, "wrong client key len");
 
   uint8_t key_src[60];
   memcpy(key_src, client_key, 24);
@@ -57,6 +53,7 @@ mrb_mruby_websockets_gem_init(mrb_state* mrb) {
   struct RClass *websocket_mod;
 
   websocket_mod = mrb_define_module(mrb, "WebSocket");
+  mrb_define_class_under(mrb, websocket_mod, "Error", E_RUNTIME_ERROR);
   mrb_define_module_function(mrb, websocket_mod, "create_accept", mrb_websocket_create_accept, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, websocket_mod, "create_key", mrb_websocket_create_key, MRB_ARGS_NONE());
 }
