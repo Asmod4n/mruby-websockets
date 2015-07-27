@@ -10,7 +10,7 @@ module WebSocket
         @socket.connect_socket @tcp_socket.fileno
       end
       key = WebSocket.create_key
-      @socket.send("GET #{path} HTTP/1.1\r\nHost: #{host}:#{port}\r\nConnection: Upgrade\r\nUpgrade: WebSocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: #{key}\r\n\r\n")
+      @socket.write("GET #{path} HTTP/1.1\r\nHost: #{host}:#{port}\r\nConnection: Upgrade\r\nUpgrade: WebSocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: #{key}\r\n\r\n")
       buf = @socket.recv 16384
       phr = Phr.new
       loop do
@@ -33,7 +33,7 @@ module WebSocket
       proto == :wss ? @tcp_socket._setnonblock(true) : @socket._setnonblock(true)
       @callbacks = Wslay::Event::Callbacks.new
       @callbacks.recv_callback {|buf, len| @socket.recv len}
-      @callbacks.send_callback {|buf| @socket.send buf}
+      @callbacks.send_callback {|buf| @socket.write buf}
       @msgs = []
       @callbacks.on_msg_recv_callback {|msg| @msgs << msg}
       @client = Wslay::Event::Context::Client.new @callbacks
@@ -66,8 +66,12 @@ module WebSocket
       end
     end
 
-    def send(msg, opcode = :text_frame, timeout = -1)
-      @client.queue_msg(opcode, msg)
+    def send(msg, opcode = nil, timeout = -1)
+      if opcode
+        @client.queue_msg(msg, opcode)
+      else
+        @client.queue_msg(msg)
+      end
       @socket_pi.events = ZMQ::POLLOUT
       while @client.want_write?
         pis = @poller.wait(timeout)
