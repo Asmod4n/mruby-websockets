@@ -134,7 +134,7 @@ module WebSocket
     end
 
     private
-    def nonblock
+    def make_nonblock
       @tcp_socket._setnonblock(true)
     end
 
