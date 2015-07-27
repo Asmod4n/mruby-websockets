@@ -5,10 +5,12 @@ module WebSocket
       when :ws
         @socket = TCPSocket.new host, port
       when :wss
-        raise Error, "wss not yet supported"
+        @tcp_socket = TCPSocket.new host, port
+        @socket = Tls::Client.new
+        @socket.connect_socket @tcp_socket.fileno
       end
       key = WebSocket.create_key
-      @socket.write("GET #{path} HTTP/1.1\r\nHost: #{host}:#{port}\r\nConnection: Upgrade\r\nUpgrade: WebSocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: #{key}\r\n\r\n")
+      @socket.send("GET #{path} HTTP/1.1\r\nHost: #{host}:#{port}\r\nConnection: Upgrade\r\nUpgrade: WebSocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: #{key}\r\n\r\n")
       buf = @socket.recv 16384
       phr = Phr.new
       loop do
@@ -28,15 +30,15 @@ module WebSocket
         @socket.close
         raise Error, "Handshake failure"
       end
-      @socket._setnonblock(true)
+      proto == :wss ? @tcp_socket._setnonblock(true) : @socket._setnonblock(true)
       @callbacks = Wslay::Event::Callbacks.new
-      @callbacks.recv_callback {|buf, len| @socket.recv len, Socket::MSG_DONTWAIT}
-      @callbacks.send_callback {|buf| @socket.send buf, Socket::MSG_DONTWAIT}
+      @callbacks.recv_callback {|buf, len| @socket.recv len}
+      @callbacks.send_callback {|buf| @socket.send buf}
       @msgs = []
       @callbacks.on_msg_recv_callback {|msg| @msgs << msg}
       @client = Wslay::Event::Context::Client.new @callbacks
       @poller = ZMQ::Poller.new
-      @socket_pi = @poller.add(@socket)
+      @socket_pi = proto == :wss ? @poller.add(@tcp_socket) : @poller.add(@socket)
     end
 
     def recv(timeout = -1)
@@ -100,7 +102,11 @@ module WebSocket
       end
       @msgs.dup
     ensure
-      @socket.close unless @socket.closed?
+      if @tcp_socket
+        @socket.close
+      else
+        @socket.close unless @socket.closed?
+      end
       @msgs.clear
     end
   end
