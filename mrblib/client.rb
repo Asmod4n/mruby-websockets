@@ -78,6 +78,9 @@ module WebSocket
       make_nonblock
       setup_ws
       setup_poller
+    rescue => e
+      @socket.close
+      raise e
     end
 
     private
@@ -94,13 +97,11 @@ module WebSocket
         when :incomplete
           buf << @socket.recv(16384)
         when :parser_error
-          @socket.close
           raise Error, "HTTP Parser error"
         end
       end
       headers = phr.headers.to_h
       unless Sodium.memcmp(WebSocket.create_accept(key), headers['sec-websocket-accept'])
-        @socket.close
         raise Error, "Handshake failure"
       end
     end
