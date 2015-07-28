@@ -6,4 +6,5 @@
   spec.add_dependency 'mruby-phr'
   spec.add_dependency 'mruby-wslay'
   spec.add_dependency 'mruby-czmq'
+  spec.add_dependency 'mruby-tls'
 end
