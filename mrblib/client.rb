@@ -46,6 +46,7 @@ module WebSocket
           return pis
         end
       end
+      self
     end
 
     def close(status_code, reason, timeout)
@@ -130,7 +131,7 @@ module WebSocket
       @path = path
       @tcp_socket = TCPSocket.new host, port
       @socket = Tls::Client.new(*args)
-      @socket.connect_socket @tcp_socket.fileno, @host
+      @socket.connect_socket @tcp_socket.fileno, host
     end
 
     private
@@ -160,8 +161,11 @@ module WebSocket
     end
 
     def send(msg, opcode = nil, timeout = -1)
-      @connection.send(msg, opcode, timeout)
-      self
+      if (ret = @connection.send(msg, opcode, timeout))
+        self
+      else
+        ret
+      end
     end
 
     alias :<< :send
