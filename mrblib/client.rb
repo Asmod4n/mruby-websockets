@@ -11,23 +11,14 @@ module WebSocket
       if @msgs.empty?
         if @client.want_read?
           @socket_pi.events = ZMQ::POLLIN
-          pis = @poller.wait(timeout)
-          if pis
-            @client.recv
-          else
-            return pis
-          end
+          @client.recv if @poller.wait(timeout)
         end
       end
       @msgs.shift
     ensure
       @socket_pi.events = ZMQ::POLLOUT
       while @client.want_write?
-        if @poller.wait(timeout)
-          @client.send
-        else
-          break
-        end
+        @client.send if @poller.wait(timeout)
       end
     end
 
@@ -39,12 +30,7 @@ module WebSocket
       end
       @socket_pi.events = ZMQ::POLLOUT
       while @client.want_write?
-        pis = @poller.wait(timeout)
-        if pis
-          @client.send
-        else
-          return pis
-        end
+        @client.send if @poller.wait(timeout)
       end
       self
     end
@@ -59,12 +45,9 @@ module WebSocket
         @socket_pi.events = 0
         @socket_pi.events |= ZMQ::POLLIN  if @client.want_read?
         @socket_pi.events |= ZMQ::POLLOUT if @client.want_write?
-        pis = @poller.wait(timeout)
-        if pis
+        if @poller.wait(timeout)
           @client.send if @socket_pi.writable?
           @client.recv if @socket_pi.readable?
-        else
-          return pis
         end
       end
       @msgs.dup
