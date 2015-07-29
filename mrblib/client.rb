@@ -145,11 +145,8 @@ module WebSocket
     end
 
     def send(msg, opcode = nil, timeout = -1)
-      if (ret = @connection.send(msg, opcode, timeout))
-        self
-      else
-        ret
-      end
+      @connection.send(msg, opcode, timeout)
+      self
     end
 
     alias :<< :send
