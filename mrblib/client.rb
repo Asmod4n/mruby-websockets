@@ -123,6 +123,32 @@ module WebSocket
       @tcp_socket._setnonblock(true)
     end
 
+    def setup_ws
+      @callbacks = Wslay::Event::Callbacks.new
+      @callbacks.recv_callback do |buf, len|
+        ret = -1
+        begin
+          ret = @socket.recv len
+        rescue Tls::WantPollin, Tls::WantPollout
+          raise Errno::EWOULDBLOCK
+        end
+        ret
+      end
+      @callbacks.send_callback do |buf|
+        ret = -1
+        begin
+          ret = @socket.write buf
+        rescue Tls::WantPollin, Tls::WantPollout
+          raise Errno::EWOULDBLOCK
+        end
+        ret
+      end
+      @msgs = []
+      @callbacks.on_msg_recv_callback {|msg| @msgs << msg}
+      @client = Wslay::Event::Context::Client.new @callbacks
+    end
+
+
     def setup_poller
       @poller = ZMQ::Poller.new
       @socket_pi = @poller.add(@tcp_socket)
