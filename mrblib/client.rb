@@ -84,7 +84,7 @@ module WebSocket
         end
       end
       headers = phr.headers.to_h
-      unless Sodium.memcmp(WebSocket.create_accept(key), headers['sec-websocket-accept'])
+      unless Sodium.memcmp(WebSocket.create_accept(key), headers.fetch('sec-websocket-accept'))
         raise Error, "Handshake failure"
       end
     end
