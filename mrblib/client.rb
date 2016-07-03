@@ -1,4 +1,8 @@
 module WebSocket
+  def self.create_key
+    B64.encode(RandomBytes.buf(16)).chomp!
+  end
+
   class WsConnection
     def initialize(host, port, path, *args)
       @host = host
@@ -10,15 +14,15 @@ module WebSocket
     def recv(timeout)
       if @msgs.empty?
         if @client.want_read?
-          @socket_pi.events = ZMQ::POLLIN
-          @client.recv if @poller.wait(timeout)
+          @socket_pi.events = Poll::In
+          @client.recv if @poll.wait(timeout)
         end
       end
       @msgs.shift
     ensure
-      @socket_pi.events = ZMQ::POLLOUT
+      @socket_pi.events = Poll::Out
       while @client.want_write?
-        @client.send if @poller.wait(timeout)
+        @client.send if @poll.wait(timeout)
       end
     end
 
@@ -28,9 +32,9 @@ module WebSocket
       else
         @client.queue_msg(msg)
       end
-      @socket_pi.events = ZMQ::POLLOUT
+      @socket_pi.events = Poll::Out
       while @client.want_write?
-        @client.send if @poller.wait(timeout)
+        @client.send if @poll.wait(timeout)
       end
       self
     end
@@ -43,9 +47,9 @@ module WebSocket
       end
       while @client.want_write?||@client.want_read?
         @socket_pi.events = 0
-        @socket_pi.events |= ZMQ::POLLIN  if @client.want_read?
-        @socket_pi.events |= ZMQ::POLLOUT if @client.want_write?
-        if @poller.wait(timeout)
+        @socket_pi.events |= Poll::In  if @client.want_read?
+        @socket_pi.events |= Poll::Out if @client.want_write?
+        if @poll.wait(timeout)
           @client.send if @socket_pi.writable?
           @client.recv if @socket_pi.readable?
         end
@@ -103,8 +107,8 @@ module WebSocket
     end
 
     def setup_poller
-      @poller = ZMQ::Poller.new
-      @socket_pi = @poller.add(@socket)
+      @poll = Poll.new
+      @socket_pi = @poll.add(@socket)
     end
   end
 
@@ -150,8 +154,8 @@ module WebSocket
 
 
     def setup_poller
-      @poller = ZMQ::Poller.new
-      @socket_pi = @poller.add(@tcp_socket)
+      @poll = Poll.new
+      @socket_pi = @poll.add(@tcp_socket)
     end
   end
 

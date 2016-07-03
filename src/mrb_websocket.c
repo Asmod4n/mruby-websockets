@@ -32,22 +32,6 @@ mrb_websocket_create_accept(mrb_state *mrb, mrb_value self)
   return accept_key;
 }
 
-static mrb_value
-mrb_websocket_create_key(mrb_state *mrb, mrb_value self)
-{
-  unsigned char random[16];
-  randombytes_buf(random, 16);
-
-  mrb_value key = mrb_str_new(mrb, NULL, 24);
-  char *c = RSTRING_PTR(key);
-  base64_encodestate s;
-  base64_init_encodestate(&s);
-  c += base64_encode_block((const char *) random, 16, c, &s);
-  base64_encode_blockend(c, &s);
-
-  return key;
-}
-
 void
 mrb_mruby_websockets_gem_init(mrb_state* mrb) {
   struct RClass *websocket_mod;
@@ -55,7 +39,6 @@ mrb_mruby_websockets_gem_init(mrb_state* mrb) {
   websocket_mod = mrb_define_module(mrb, "WebSocket");
   mrb_define_class_under(mrb, websocket_mod, "Error", E_RUNTIME_ERROR);
   mrb_define_module_function(mrb, websocket_mod, "create_accept", mrb_websocket_create_accept, MRB_ARGS_REQ(1));
-  mrb_define_module_function(mrb, websocket_mod, "create_key", mrb_websocket_create_key, MRB_ARGS_NONE());
 }
 
 void

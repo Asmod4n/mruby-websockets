@@ -1,5 +1,14 @@
 ﻿# mruby-websockets
 
+You need to have libressl installed, on macOS this can be easily done with homebrew.
+Then add
+```ruby
+  conf.gem mgem: 'mruby-websockets' do |g|
+    g.cc.include_paths << '/usr/local/opt/libressl/include'
+    g.linker.library_paths << '/usr/local/opt/libressl/lib'
+  end
+```
+to your build_config.rb
 
 Example
 =======
