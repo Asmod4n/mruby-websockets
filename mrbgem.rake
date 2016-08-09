@@ -7,6 +7,7 @@
   spec.add_dependency 'mruby-wslay'
   spec.add_dependency 'mruby-poll'
   spec.add_dependency 'mruby-tls'
-  spec.add_dependency 'mruby-libsodium'
+  spec.add_dependency 'mruby-sysrandom'
   spec.add_dependency 'mruby-b64'
+  spec.add_dependency 'mruby-secure-compare'
 end

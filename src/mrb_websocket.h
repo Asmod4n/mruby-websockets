@@ -5,6 +5,5 @@
 #include <openssl/sha.h>
 #include <mruby/string.h>
 #include <b64/cencode.h>
-#include <sodium.h>
 
 #endif

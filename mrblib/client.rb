@@ -1,6 +1,6 @@
 module WebSocket
   def self.create_key
-    B64.encode(RandomBytes.buf(16)).chomp!
+    B64.encode(Sysrandom.buf(16)).chomp!
   end
 
   class WsConnection
@@ -88,7 +88,7 @@ module WebSocket
         end
       end
       headers = phr.headers.to_h
-      unless Sodium.memcmp(WebSocket.create_accept(key), headers.fetch('sec-websocket-accept'))
+      unless WebSocket.create_accept(key).securecmp(headers.fetch('sec-websocket-accept'))
         raise Error, "Handshake failure"
       end
     end
