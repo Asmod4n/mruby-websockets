@@ -41,7 +41,4 @@ mrb_mruby_websockets_gem_init(mrb_state* mrb) {
   mrb_define_module_function(mrb, websocket_mod, "create_accept", mrb_websocket_create_accept, MRB_ARGS_REQ(1));
 }
 
-void
-mrb_mruby_websockets_gem_final(mrb_state* mrb) {
-  /* finalizer */
-}
+void mrb_mruby_websockets_gem_final(mrb_state* mrb) {}

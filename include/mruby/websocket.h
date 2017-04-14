@@ -3,14 +3,10 @@
 
 #include <mruby.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+MRB_BEGIN_DECL
 
 #define E_WEBSOCKET_ERROR mrb_class_get_under(mrb, mrb_module_get(mrb, "WebSocket"), "Error")
 
-#ifdef __cplusplus
-}
-#endif
+MRB_END_DECL
 
 #endif

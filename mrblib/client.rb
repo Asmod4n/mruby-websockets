@@ -56,8 +56,8 @@ module WebSocket
       end
       @msgs.dup
     ensure
-      @socket.close
       @msgs.clear
+      @socket.close
     end
 
     def setup
@@ -74,21 +74,20 @@ module WebSocket
     def http_handshake
       key = WebSocket.create_key
       @socket.write("GET #{@path} HTTP/1.1\r\nHost: #{@host}:#{@port}\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: #{key}\r\n\r\n")
-      buf = @socket.recv 16384
+      buf = @socket.recv
       phr = Phr.new
-      loop do
+      while true
         ret = phr.parse_response(buf)
         case ret
         when Fixnum
           break
         when :incomplete
-          buf << @socket.recv(16384)
+          buf << @socket.recv
         when :parser_error
           raise Error, "HTTP Parser error"
         end
       end
-      headers = phr.headers.to_h
-      unless WebSocket.create_accept(key).securecmp(headers.fetch('sec-websocket-accept'))
+      unless WebSocket.create_accept(key).securecmp(phr.headers.to_h.fetch('sec-websocket-accept'))
         raise Error, "Handshake failure"
       end
     end
