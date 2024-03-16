@@ -72,6 +72,7 @@ module WebSocket
       @msgs.clear
       @tcp_socket._setnonblock(false)
       @socket.close
+      @tcp_socket.close
     end
 
     private
@@ -83,6 +84,7 @@ module WebSocket
     rescue => e
       @tcp_socket._setnonblock(false)
       @socket.close
+      @tcp_socket.close
       raise e
     end
 
@@ -101,7 +103,6 @@ module WebSocket
           raise Error, "HTTP Parser error"
         end
       end
-      puts phr.headers.to_h
       unless WebSocket.create_accept(key).securecmp(phr.headers.to_h.fetch('sec-websocket-accept'))
         raise Error, "Handshake failure"
       end
