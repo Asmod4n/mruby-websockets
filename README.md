@@ -14,7 +14,7 @@ to your build_config.rb
 Example
 ===========
 ```ruby
-client = WebSocket::Client.new("echo.websocket.org", 443, '/', ciphers: 'TLSv1.2') # needed for amazon web services
+client = WebSocket::Client.new("echo.websocket.org", 443, '/', ciphers: 'TLSv1.2')
 client.send "hallo"
 client.recv
 client.close

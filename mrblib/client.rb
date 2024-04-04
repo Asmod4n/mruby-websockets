@@ -103,7 +103,10 @@ module WebSocket
           raise Error, "HTTP Parser error"
         end
       end
-      unless WebSocket.create_accept(key).securecmp(phr.headers.to_h.fetch('sec-websocket-accept'))
+      header = phr.headers.each do |key, value|
+        return value if key.downcase == 'sec-websocket-accept'
+      end
+      unless WebSocket.create_accept(key).securecmp(header)
         raise Error, "Handshake failure"
       end
     end
