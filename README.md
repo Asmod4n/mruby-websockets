@@ -1,4 +1,8 @@
-﻿# mruby-websockets
+Hi there, this repo wont get updates for the client side anymore.
+
+Take a look at the https://github.com/Asmod4n/mruby-url repo how to interact with websockets from now on.
+
+ # mruby-websockets
 
 You need to have libressl installed, on macOS this can be easily done with homebrew.
 Then add
